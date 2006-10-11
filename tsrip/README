@@ -1,0 +1,43 @@
+=====
+tsrip
+=====
+
+tsrip is a simple cd ripping and encoding program. It supports and will only
+support free codecs. Also, it will only support utf8, as the author doesn't
+want to fight with the problems coming with featuring any other than that.
+
+============
+Installation
+============
+
+For installation instructions, see INSTALL.
+
+=============
+Configuration
+=============
+
+Tsrip has the following configuration options, which can be defined in
+~/tsriprc.
+
+musicdir=<path>
+
+The path where the encoded tracks will be saved. Default is ~/music.
+
+paranoia_mode=<mode>
+
+One of the following paranoia modes: off, verify, fragment, overlap,
+scratch, repair, neverskip, full. Default is repair.
+
+vorbis_quality=<value>
+
+The value can be between 1 and 10, the higher this value is, the better the
+quality of the ogg file. A quality level of 4 means approx. 128 kbit/s, which
+is default.
+
+
+=======
+Licence
+=======
+
+This Program is Licenced under the terms of the GNU GPL, Version 2. See
+COPYING for details.

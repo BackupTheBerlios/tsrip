@@ -1,0 +1,9 @@
+=========================
+Installation Instructions
+=========================
+
+To install tsrip, you just need to edit the Makefile and modify it to your
+needs. The only things your normally need to edit is INSTALLDIR and CC. Make
+sure you have libvorbis, libmusicbrainz and libcdparanoia (cdparanoia)
+installed. Make sure to have the appropriate *-dev packages installed, this is
+necessary on systems like debian.

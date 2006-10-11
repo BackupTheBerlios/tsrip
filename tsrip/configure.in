@@ -1,0 +1,32 @@
+AC_INIT(src/tsr_cli.c)
+AC_CONFIG_AUX_DIR(config)
+AM_INIT_AUTOMAKE(tsrip, 0.0.1)
+
+AC_PROG_CC
+##AC_LANG(C)
+
+AC_CHECK_HEADERS(cdda_interface.h)
+
+AC_CHECK_HEADERS(cdda_paranoia.h, ,
+		[AC_MSG_ERROR("cannot find paranoia header files")],
+		[
+#if HAVE_CDDA_INTERFACE_H
+#include <cdda_interface.h>
+#endif
+])
+
+AC_CHECK_HEADERS(vorbis/vorbisenc.h, ,
+		 [AC_MSG_ERROR("cannot find vorbis header files")])
+AC_CHECK_HEADERS(musicbrainz/mb_c.h, ,
+		 [AC_MSG_ERROR("cannot find musicbrainz header files")])
+
+AC_CHECK_LIB(cdda_paranoia, paranoia_init, ,
+	     [AC_MSG_ERROR("cannot find paranoia libs")])
+AC_CHECK_LIB(vorbisenc, vorbis_info_init, ,
+	     [AC_MSG_ERROR("cannot find vorbis libs")])
+AC_CHECK_LIB(musicbrainz, mb_New, ,
+	     [AC_MSG_ERROR("cannot find musicbrainz libs")])
+
+AC_SUBST(LIBS)
+
+AC_OUTPUT(Makefile src/Makefile)
