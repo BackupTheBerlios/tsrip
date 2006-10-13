@@ -36,6 +36,7 @@
 char *
 tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 {
+	char *music_path;
 	char *artist_path;
 	char *album_path;
 	char *artist;
@@ -43,6 +44,7 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 	char *home;
 	struct stat s;
 	mode_t mode;
+	int new_mpath = 0; /* FIXME: hack */
 
 	if(metainfo->ismultiple)
 		artist = "Various";
@@ -56,21 +58,21 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 		char *buf;
 
 		home = getenv("HOME");
-		asprintf(&buf,"%s%s", home, (musicdir + 1));
+		asprintf(&music_path,"%s%s", home, (musicdir + 1));
+		new_mpath = 1;
 
-		free(musicdir);
 		free(home);
-
-		musicdir = buf;
 	}
+	else
+		music_path = musicdir;
 
-	if(lstat(musicdir, &s))
+	if(lstat(music_path, &s) == -1 && errno != EEXIST)
 	{
 		perror("Failed to access music directory");
 		exit(1);
 	}
 	
-	asprintf(&artist_path, "%s/%s", musicdir, artist);
+	asprintf(&artist_path, "%s/%s", music_path, artist);
 
 	if(mkdir(artist_path, mode) == -1 && errno != EEXIST)
 	{
@@ -87,6 +89,8 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 
 	asprintf(&fname, "%s/%s.ogg", album_path, metainfo->trackinfos[tracknum]->title);
 
+	if(new_mpath)
+		free(music_path);
 	free(artist_path);
 	free(album_path);
 
