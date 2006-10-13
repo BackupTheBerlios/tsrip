@@ -29,7 +29,10 @@
 #define lineno(x) rlineno(x)
 #define rlineno(x) #x
 
-/* Initialize musicbrainz, set utf, set device etc. */
+/*
+ * Initialize musicbrainz, set utf, set device etc.
+ *
+ */
 musicbrainz_t
 tsr_mb_init(char *device)
 {
@@ -42,7 +45,10 @@ tsr_mb_init(char *device)
 	return mb_o;
 }
 
-/* Get number of albums found for cd in drive */
+/* 
+ * Get number of albums found for cd in drive.
+ *
+ */
 int
 tsr_mb_numalbums(musicbrainz_t mb_o)
 {
@@ -54,7 +60,10 @@ tsr_mb_numalbums(musicbrainz_t mb_o)
 	return (c > 0) ? c : 0;
 }
 
-/* Get number of tracks for the given album number */
+/* 
+ * Get number of tracks for the given album number.
+ *
+ */
 int
 tsr_mb_album_numtracks(musicbrainz_t mb_o, int numalbum)
 {
@@ -66,7 +75,10 @@ tsr_mb_album_numtracks(musicbrainz_t mb_o, int numalbum)
 	return tracks;
 }
 
-/* Get name for the given album number */
+/*
+ * Get name for the given album number.
+ *
+ */
 char *
 tsr_mb_album_name(musicbrainz_t mb_o, int numalbum)
 {
@@ -92,7 +104,10 @@ tsr_mb_album_name(musicbrainz_t mb_o, int numalbum)
 	return album;
 }
 
-/* Get artist for the given album and track number */
+/*
+ * Get artist for the given album and track number.
+ *
+ */
 char *
 tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack)
 {	
@@ -119,7 +134,10 @@ tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack)
 
 }
 
-/* Check if the album identifyed by numalbum is a multiartist album */
+/* 
+ * Check if the album identifyed by numalbum is a multiartist album.
+ *
+ */
 int
 tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
 {
@@ -153,7 +171,10 @@ tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
 	return 0;
 }
 
-/* Get track name for the given album and track number */
+/* 
+ * Get track name for the given album and track number.
+ *
+ */
 char *
 tsr_mb_track_title(musicbrainz_t mb_o, int numalbum, int numtrack)
 {

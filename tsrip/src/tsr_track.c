@@ -30,7 +30,10 @@
 
 #include "tsr_types.h"
 
-/* initialize file, ogg stuff etc. */
+/* 
+ * Initialize file, ogg stuff etc. 
+ *
+ */
 tsr_trackfile_t *
 tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo)
 {
@@ -102,7 +105,10 @@ tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo)
 	return trackfile;
 }
 
-/* Write next ogg blocks and finish unfinished ones */
+/* 
+ * Write next ogg blocks and finish unfinished ones.
+ *
+ */
 void
 tsr_trackfile_encode_handle_blocks(tsr_trackfile_t *trackfile)
 {
@@ -132,7 +138,10 @@ tsr_trackfile_encode_handle_blocks(tsr_trackfile_t *trackfile)
 	}
 }
 
-/* Encode next buffer */
+/* 
+ * Encode next buffer. 
+ *
+ */
 void
 tsr_trackfile_encode_next(tsr_trackfile_t *trackfile, char *read_buffer)
 {
@@ -154,7 +163,10 @@ tsr_trackfile_encode_next(tsr_trackfile_t *trackfile, char *read_buffer)
 	tsr_trackfile_encode_handle_blocks(trackfile);
 }
 
-/* OMG, something went wrong ... */
+/* 
+ * OMG, something went wrong ...
+ *
+ */
 void
 tsr_trackfile_fail(tsr_trackfile_t *trackfile)
 {
@@ -162,7 +174,10 @@ tsr_trackfile_fail(tsr_trackfile_t *trackfile)
 	unlink(trackfile->filename);
 }
 
-/* Finish file */
+/* 
+ * Finish file. 
+ *
+ */
 void
 tsr_trackfile_finish(tsr_trackfile_t *trackfile)
 {

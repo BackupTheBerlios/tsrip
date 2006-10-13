@@ -25,6 +25,7 @@ typedef struct _tsr_cfg_t
 	char *cfg_file;
 	FILE *cfg_fp;
 	char *musicdir;
+	char *device;
 	int paranoia_mode;
 	float vorbis_quality;
 } tsr_cfg_t;

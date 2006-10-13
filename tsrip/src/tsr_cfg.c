@@ -36,6 +36,10 @@
 #define CFG_FILE ".tsriprc"
 #define CFG_MUSICDIR "~/music"
 
+/*
+ * Set music dir, without checking if it exists.
+ *
+ */
 int
 tsr_cfg_set_musicdir(tsr_cfg_t *cfg, char *val)
 {
@@ -56,6 +60,32 @@ tsr_cfg_set_musicdir(tsr_cfg_t *cfg, char *val)
 	return 1;
 }
 
+/*
+ * Set device, without checking if it exists. Paranoia will do this for us.
+ *
+ */
+int
+tsr_cfg_set_device(tsr_cfg_t *cfg, char *val)
+{
+	char *device;
+	int len;
+	len = strlen(val) + 1;
+	
+	device = (char *) malloc(len * sizeof(char));
+	if(!device)
+	{
+		perror(__FILE__":"lineno(__LINE__));
+		exit(1);
+	}
+
+	strncpy(device, val, len);
+	cfg->device = device;
+}
+
+/*
+ * Set paranoia mode, only these predefined values are allowed..
+ *
+ */
 int
 tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val)
 {
@@ -81,6 +111,10 @@ tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val)
 	return 1;
 }
 
+/*
+ * Set vorbis quality.
+ *
+ */
 int
 tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val)
 {
@@ -106,7 +140,7 @@ void
 tsr_cfg_defaults(tsr_cfg_t *cfg)
 {
 	tsr_cfg_set_musicdir(cfg, CFG_MUSICDIR);
-
+	cfg->device = 0;
 	cfg->paranoia_mode = PARANOIA_MODE_REPAIR;
 	cfg->vorbis_quality = 0.4;
 }
@@ -124,7 +158,6 @@ tsr_cfg_getval(char *line, char **val)
 		return 0;
 
 	*esign = 0;
-
 	*nsign = 0;
 	*val = esign + 1;
 
@@ -153,6 +186,8 @@ tsr_cfg_setopt(tsr_cfg_t *cfg, char *line)
 		return tsr_cfg_set_paranoiamode(cfg, val);
 	if(!strcmp(line, "vorbis_quality"))
 		return tsr_cfg_set_vorbisqualiy(cfg, val);
+	if(!strcmp(line, "device"))
+		return tsr_cfg_set_device(cfg, val);
 	else
 		return 0;
 }

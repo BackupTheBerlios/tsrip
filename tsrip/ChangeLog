@@ -1,3 +1,9 @@
-2006-10-11 Sven Salzwedel <sven_salzwedel@web.de>
+2006-10-13  Sven Salzwedel <sven_salzwedel@web.de>
+
+	* Added "device" to config file options
+	* Refactored track encoding loop 
+	* Better error reporting when creating the album directory
+
+2006-10-11  Sven Salzwedel <sven_salzwedel@web.de>
 
 	* Initial Release

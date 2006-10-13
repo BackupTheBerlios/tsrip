@@ -29,7 +29,10 @@
 
 #include "tsr_types.h"
 
-/* Create filename and needed directorys */
+/*
+ * Create filename and needed directorys.
+ *
+ */
 char *
 tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 {
@@ -38,6 +41,7 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 	char *artist;
 	char *fname;
 	char *home;
+	struct stat s;
 	mode_t mode;
 
 	if(metainfo->ismultiple)
@@ -49,23 +53,35 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 
 	if(*musicdir == '~')
 	{
+		char *buf;
+
 		home = getenv("HOME");
-		asprintf(&artist_path,"%s%s/%s", home, (musicdir + 1), artist);
+		asprintf(&buf,"%s%s", home, (musicdir + 1));
+
+		free(musicdir);
 		free(home);
+
+		musicdir = buf;
 	}
-	else
-		asprintf(&artist_path, "%s/%s", musicdir, artist);
+
+	if(lstat(musicdir, &s))
+	{
+		perror("Failed to access music directory");
+		exit(1);
+	}
+	
+	asprintf(&artist_path, "%s/%s", musicdir, artist);
 
 	if(mkdir(artist_path, mode) == -1 && errno != EEXIST)
 	{
-		perror("Failed to create directory");
+		perror("Failed to create artist directory");
 		exit(1);
 	}
 
 	asprintf(&album_path, "%s/%s", artist_path, metainfo->album);
 	if(mkdir(album_path, mode) == -1 && errno != EEXIST)
 	{
-		perror("Failed to create directory");
+		perror("Failed to create album directory");
 		exit(1);
 	}
 
@@ -77,6 +93,10 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 	return fname;
 }
 
+/*
+ * Free metainfo structure.
+ *
+ */
 void
 tsr_metainfo_free(tsr_metainfo_t *metainfo)
 {

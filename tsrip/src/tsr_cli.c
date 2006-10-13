@@ -134,8 +134,10 @@ tsr_cli_metainfo_mb_bynum(musicbrainz_t mb_o, int numalbum)
 			exit(1);
 		}
 
-		metainfo->trackinfos[i]->title = tsr_mb_track_title(mb_o, numalbum, i + 1);
-		metainfo->trackinfos[i]->artist = tsr_mb_track_artist(mb_o, numalbum, i + 1);
+		metainfo->trackinfos[i]->title = tsr_mb_track_title(mb_o,
+				numalbum, i + 1);
+		metainfo->trackinfos[i]->artist = tsr_mb_track_artist(mb_o,
+				numalbum, i + 1);
 	}
 
 	return metainfo;
@@ -178,7 +180,7 @@ void tsr_cli_artist_edit(tsr_metainfo_t *metainfo) { char *artist = 0; size_t
 	{
 		free(artist);
 		return;
-	}
+	} 
 
 	tsr_cli_stripnewline(artist);
 	alen = strlen(artist) + 1;
@@ -463,6 +465,64 @@ tsr_cli_metainfo(musicbrainz_t mb_o, int numtracks)
 }
 
 /*
+ * Encode the specified track.
+ *
+ */
+void
+tsr_cli_encode_track(int tracknum, char *musicdir, tsr_metainfo_t *metainfo,
+		cdrom_drive *drive, cdrom_paranoia *paranoia)
+{
+	char *filename, *read_buffer;
+	int rtrack;
+	long fsec, lsec, cursor, p, pp;
+	tsr_trackfile_t *trackfile;
+
+	filename = tsr_get_filename(musicdir, metainfo, tracknum);
+	rtrack = tracknum + 1;
+
+	fsec = cdda_track_firstsector(drive, rtrack);
+	lsec = cdda_track_lastsector(drive, rtrack);
+
+	paranoia_seek(paranoia, fsec, SEEK_SET);
+
+	trackfile = tsr_trackfile_init(tracknum, filename, metainfo);
+
+	cursor = fsec;
+	pp = 0;
+
+	while(cursor <= lsec)
+	{
+		read_buffer = (char *) paranoia_read(paranoia, cb);
+
+		if(!read_buffer)
+		{
+			tsr_trackfile_fail(trackfile);
+			printf("\n");
+			fflush(stdout);
+			fprintf(stderr, "Error reading Track %i\n", rtrack);
+			exit(1);
+		}
+
+		tsr_trackfile_encode_next(trackfile, read_buffer);
+
+		p = (cursor - fsec) * 100 / (lsec - fsec);
+
+		if(p != pp)
+		{
+			printf("\rEncoding Track No. %02i/%02i... %3li%%", rtrack,
+					metainfo->numtracks, p);
+			fflush(stdout);
+		}
+
+		pp = p;
+		cursor++;
+	}
+
+	
+	tsr_trackfile_finish(trackfile);
+}
+
+/*
  * Main program
  *
  */
@@ -470,7 +530,7 @@ int
 main(int argc, char **argv)
 {
 	int i;
-	cdrom_drive *drive;
+	cdrom_drive *drive = 0;
 	cdrom_paranoia *paranoia;
 	musicbrainz_t *mb_o;
 	tsr_metainfo_t *metainfo;
@@ -480,15 +540,21 @@ main(int argc, char **argv)
 
 	cfg = tsr_cfg_init();
 
-	printf("Initializing device...\n");
+	printf("Initializing device...");
 	fflush(stdout);
-	drive = cdda_find_a_cdrom(CDDA_MESSAGE_FORGETIT, 0);
 
-	if(cdda_open(drive))
+	if(cfg->device)
+		drive = cdda_identify(cfg->device, CDDA_MESSAGE_FORGETIT, 0);
+	else
+		drive = cdda_find_a_cdrom(CDDA_MESSAGE_FORGETIT, 0);
+		
+	if(!drive || cdda_open(drive))
 	{
 		fprintf(stderr, "Can't open cdrom drive.\n");
 		exit(1);
 	}
+
+	printf(" %s\n", drive->cdda_device_name);
 
 	mb_o = tsr_mb_init(drive->cdda_device_name);
 	metainfo = tsr_cli_metainfo(mb_o, drive->tracks);
@@ -504,59 +570,9 @@ main(int argc, char **argv)
 
 	paranoia = paranoia_init(drive);
 	paranoia_modeset(paranoia, cfg->paranoia_mode);
-
+	
 	for(i = 0; i < metainfo->numtracks; i++)
-	{
-		char *filename;
-		int rtrack;
-		long fsec, lsec, cursor, p, pp;
-		char *read_buffer;
-		tsr_trackfile_t *trackfile;
-
-		filename = tsr_get_filename(cfg->musicdir, metainfo, i);
-		rtrack = i + 1;
-
-		fsec = cdda_track_firstsector(drive, rtrack);
-		lsec = cdda_track_lastsector(drive, rtrack);
-
-		paranoia_seek(paranoia, fsec, SEEK_SET);
-
-		trackfile = tsr_trackfile_init(i, filename, metainfo);
-
-		cursor = fsec;
-		pp = 0;
-
-		while(cursor <= lsec)
-		{
-			read_buffer = (char *) paranoia_read(paranoia, cb);
-
-			if(!read_buffer)
-			{
-				tsr_trackfile_fail(trackfile);
-				printf("\n");
-				fflush(stdout);
-				fprintf(stderr, "Error reading Track %i\n", i + rtrack);
-				exit(1);
-			}
-
-			tsr_trackfile_encode_next(trackfile, read_buffer);
-
-			p = (cursor - fsec) * 100 / (lsec - fsec);
-
-			if(p != pp)
-			{
-				printf("\rEncoding Track No. %02i/%02i... %3li%%", rtrack,
-						metainfo->numtracks, p);
-				fflush(stdout);
-			}
-
-			pp = p;
-			cursor++;
-		}
-
-		
-		tsr_trackfile_finish(trackfile);
-	}
+		tsr_cli_encode_track(i, cfg->musicdir, metainfo, drive, paranoia);
 
 	tsr_metainfo_free(metainfo);
 	printf("\nEncoded all tracks.\n");
