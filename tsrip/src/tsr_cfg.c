@@ -28,59 +28,13 @@
 #include <cdda_interface.h>
 #include <cdda_paranoia.h>
 
+#include "tsr_types.h"
+#include "tsr_util.h"
 #include "tsr_cfg.h"
-
-#define lineno(x) rlineno(x)
-#define rlineno(x) #x
 
 #define CFG_FILE ".tsriprc"
 #define CFG_MUSICDIR "~/music"
-
-/*
- * Set music dir, without checking if it exists.
- *
- */
-int
-tsr_cfg_set_musicdir(tsr_cfg_t *cfg, char *val)
-{
-	char *musicdir;
-	int len;
-	len = strlen(val) + 1;
-
-	musicdir = (char *) malloc(len * sizeof(char));
-	if(!musicdir)
-	{
-		perror(__FILE__":"lineno(__LINE__));
-		exit(1);
-	}
-
-	strncpy(musicdir, val, len);
-	cfg->musicdir = musicdir;
-	
-	return 1;
-}
-
-/*
- * Set device, without checking if it exists. Paranoia will do this for us.
- *
- */
-int
-tsr_cfg_set_device(tsr_cfg_t *cfg, char *val)
-{
-	char *device;
-	int len;
-	len = strlen(val) + 1;
-	
-	device = (char *) malloc(len * sizeof(char));
-	if(!device)
-	{
-		perror(__FILE__":"lineno(__LINE__));
-		exit(1);
-	}
-
-	strncpy(device, val, len);
-	cfg->device = device;
-}
+#define CFG_DEVICE "/dev/cdrom"
 
 /*
  * Set paranoia mode, only these predefined values are allowed..
@@ -133,18 +87,41 @@ tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val)
 }
 
 /*
+ * Set if we should ask for multiple cd album.
+ *
+ */
+int
+tsr_cfg_set_multidisc(tsr_cfg_t *cfg, char *val)
+{
+	if(!strcmp(val, "on"))
+		cfg->multidisc = 1;
+	else if(!strcmp(val, "off"))
+		cfg->multidisc = 0;
+	else
+		return 0;
+
+	return 1;
+}
+
+
+/*
  * Load default configuration.
  *
  */
 void
 tsr_cfg_defaults(tsr_cfg_t *cfg)
 {
-	tsr_cfg_set_musicdir(cfg, CFG_MUSICDIR);
-	cfg->device = 0;
+	tsr_copystr(&cfg->musicdir, CFG_MUSICDIR);
+	tsr_copystr(&cfg->device, CFG_DEVICE);
 	cfg->paranoia_mode = PARANOIA_MODE_REPAIR;
 	cfg->vorbis_quality = 0.4;
+	cfg->multidisc = 0;
 }
 
+/*
+ * Get value out of a line in the cfg file.
+ *
+ */
 int
 tsr_cfg_getval(char *line, char **val)
 {
@@ -181,15 +158,19 @@ tsr_cfg_setopt(tsr_cfg_t *cfg, char *line)
 		return 0;
 
 	if(!strcmp(line, "musicdir"))
-		return tsr_cfg_set_musicdir(cfg, val);
-	if(!strcmp(line, "paranoia_mode"))
+		tsr_copystr(&cfg->musicdir, val);
+	else if(!strcmp(line, "device"))
+		tsr_copystr(&cfg->device, val);
+	else if(!strcmp(line, "paranoiamode"))
 		return tsr_cfg_set_paranoiamode(cfg, val);
-	if(!strcmp(line, "vorbis_quality"))
+	else if(!strcmp(line, "vorbisquality"))
 		return tsr_cfg_set_vorbisqualiy(cfg, val);
-	if(!strcmp(line, "device"))
-		return tsr_cfg_set_device(cfg, val);
+	else if(!strcmp(line, "multidisc"))
+		return tsr_cfg_set_multidisc(cfg, val);
 	else
 		return 0;
+
+	return 1;
 }
 
 /*
@@ -199,10 +180,11 @@ tsr_cfg_setopt(tsr_cfg_t *cfg, char *line)
 void
 tsr_cfg_load_usercfg(tsr_cfg_t *cfg)
 {
-	char *home, *line = 0;
+	char *home, *line;
 	int lineno = 0;
 	size_t len;
 
+	line = 0;
 	home = getenv("HOME");
 	if(!home)
 	{
@@ -231,7 +213,8 @@ tsr_cfg_load_usercfg(tsr_cfg_t *cfg)
 			exit(1);
 		}
 
-		free(line);
+		if(line)
+			free(line);
 		line = 0;
 	}
 
@@ -246,7 +229,7 @@ tsr_cfg_init()
 	cfg = (tsr_cfg_t *) malloc(sizeof(tsr_cfg_t));
 	if(!cfg)
 	{
-		perror(__FILE__":"lineno(__LINE__));
+		perror(__FILE__":"LINENO(__LINE__));
 		exit(1);
 	}
 

@@ -28,6 +28,7 @@
 #include <errno.h>
 
 #include "tsr_types.h"
+#include "tsr_util.h"
 
 /*
  * Create filename and needed directorys.
@@ -95,6 +96,21 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 	free(album_path);
 
 	return fname;
+}
+
+void
+tsr_copystr(char **dest, char *src)
+{
+	int len;
+
+	len = strlen(src) + 1;
+	*dest = (char *) malloc(len * sizeof(char));
+	if(!*dest)
+	{
+		perror(__FILE__":"LINENO(__LINE__));
+		exit(1);
+	}
+	strncpy(*dest, src, len);
 }
 
 /*

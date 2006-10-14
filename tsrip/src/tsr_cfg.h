@@ -28,7 +28,14 @@ typedef struct _tsr_cfg_t
 	char *device;
 	int paranoia_mode;
 	float vorbis_quality;
+	int multidisc;
 } tsr_cfg_t;
+
+int
+tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val);
+
+int
+tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val);
 
 tsr_cfg_t *
 tsr_cfg_init();

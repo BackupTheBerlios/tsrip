@@ -26,9 +26,6 @@
 #include <errno.h>
 #include <musicbrainz/mb_c.h>
 
-#define lineno(x) rlineno(x)
-#define rlineno(x) #x
-
 /*
  * Initialize musicbrainz, set utf, set device etc.
  *
@@ -84,22 +81,12 @@ tsr_mb_album_name(musicbrainz_t mb_o, int numalbum)
 {
 	char buf[256];
 	char *album;
-	int len;
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
 	mb_GetResultData(mb_o, MBE_AlbumGetAlbumName, buf, 256);
 
 	buf[255] = 0;
-	len = strlen(buf) + 1;
-
-	album = (char *) malloc(len * sizeof(char));
-	if(!album)
-	{
-		perror(__FILE__":"lineno(__LINE__));
-		exit(1);
-	}
-
-	strncpy(album, buf, len);
+	tsr_copystr(&album, buf);
 
 	return album;
 }
@@ -119,16 +106,7 @@ tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack)
 	mb_GetResultData1(mb_o, MBE_AlbumGetArtistName, buf, 256, numtrack);
 	
 	buf[255] = 0;
-	len = strlen(buf) + 1;
-
-	artist = (char *) malloc(len * sizeof(char));
-	if(!artist)
-	{
-		perror(__FILE__":"lineno(__LINE__));
-		exit(1);
-	}
-
-	strncpy(artist, buf, len);
+	tsr_copystr(&artist, buf);
 
 	return artist;
 
@@ -149,14 +127,11 @@ tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
 	{
 		artist = tsr_mb_track_artist(mb_o, numalbum, i);
 		if(!partist)
-			partist = artist;
+			tsr_copystr(&partist, artist);
 		else
 		{
 			if(!strcmp(partist, artist))
-			{
-				free(partist);
-				partist = artist;
-			}
+				free(artist);
 			else
 			{
 				free(partist);
@@ -178,24 +153,15 @@ tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
 char *
 tsr_mb_track_title(musicbrainz_t mb_o, int numalbum, int numtrack)
 {
-	char buffer[256];
+	char buf[256];
 	char *title;
 	int len;
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
-	mb_GetResultData1(mb_o, MBE_AlbumGetTrackName, buffer, 256, numtrack);
+	mb_GetResultData1(mb_o, MBE_AlbumGetTrackName, buf, 256, numtrack);
 
-	buffer[255] = 0;
-	len = strlen(buffer) + 1;
-
-	title = (char *) malloc(len * sizeof(char));
-	if(!title)
-	{
-		perror(__FILE__":"lineno(__LINE__));
-		exit(1);
-	}
-
-	strncpy(title, buffer, len);
+	buf[255] = 0;
+	tsr_copystr(&title, buf);
 
 	return title;
 }

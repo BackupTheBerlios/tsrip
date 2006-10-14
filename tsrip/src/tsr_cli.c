@@ -26,20 +26,58 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <getopt.h>
 #include <cdda_interface.h>
 #include <cdda_paranoia.h>
 
+#include "config.h"
 #include "tsr_cfg.h"
-#include "tsr_types.h"
 #include "tsr_track.h"
 #include "tsr_mb.h"
 #include "tsr_util.h"
 
-#define lineno(x) rlineno(x)
-#define rlineno(x) #x
+/*
+ * Print version.
+ *
+ */
+void
+tsr_cli_print_version()
+{
+	printf(PACKAGE " " VERSION "\n");
+}
+
+/*
+ * Print usage.
+ *
+ */
+void
+tsr_cli_print_usage()
+{
+	printf("Usage: " PACKAGE " [options]\n");
+	printf("	-m --multidisc			Ask for disc number\n"
+	       "	-d --device <device>		Use device <device>\n"
+	       "	-p --paranoiamode <mode>	Paranoia mode to use\n"
+	       "	   --musicdir <dir>		Directory wher files should be saved\n"
+	       "	   --vorbisquality <1-10>	The vorbis quality to use\n"
+	       "	-u --usage			Print usage information\n"
+	       "	-v --version			Print version\n"
+	       "	-h --help			Print help\n");
+}
+
+/*
+ * Print version, usage and help.
+ *
+ */
+void
+tsr_cli_print_help()
+{
+	tsr_cli_print_version();
+	tsr_cli_print_usage();
+}
+
 
 /* 
- * Strip newline and set it as end of the string
+ * Strip newline and set it as end of the string.
  *
  */
 void
@@ -52,7 +90,7 @@ tsr_cli_stripnewline(char *str)
 }
 
 /*
- * Print the head (album, artist) of the given metainfo
+ * Print the head (album, artist) of the given metainfo.
  *
  */
 void
@@ -67,7 +105,7 @@ tsr_cli_print_metainfo_head(tsr_metainfo_t *metainfo)
 }
 
 /*
- * Shows the given metainfo about an album
+ * Shows the given metainfo about an album.
  *
  */
 void
@@ -96,7 +134,7 @@ void cb(long a, int b)
 {}
 
 /*
- * Get metainfo for a single album, identifyed by number
+ * Get metainfo for a single album, identifyed by number.
  *
  */
 tsr_metainfo_t *
@@ -108,7 +146,7 @@ tsr_cli_metainfo_mb_bynum(musicbrainz_t mb_o, int numalbum)
 	metainfo = (tsr_metainfo_t *) malloc(sizeof(tsr_metainfo_t));
 	if(!metainfo)
 	{
-		perror(__FILE__":"lineno(__LINE__));
+		perror(__FILE__":"LINENO(__LINE__));
 		exit(1);
 	}
 
@@ -120,7 +158,7 @@ tsr_cli_metainfo_mb_bynum(musicbrainz_t mb_o, int numalbum)
 			metainfo->numtracks * sizeof(tsr_trackinfo_t *));
 	if(!metainfo->trackinfos)
 	{
-		perror(__FILE__":"lineno(__LINE__));
+		perror(__FILE__":"LINENO(__LINE__));
 		exit(1);
 	}
 
@@ -130,7 +168,7 @@ tsr_cli_metainfo_mb_bynum(musicbrainz_t mb_o, int numalbum)
 			malloc(sizeof(tsr_trackinfo_t));
 		if(!metainfo->trackinfos[i])
 		{
-			perror(__FILE__":"lineno(__LINE__));
+			perror(__FILE__":"LINENO(__LINE__));
 			exit(1);
 		}
 
@@ -144,7 +182,7 @@ tsr_cli_metainfo_mb_bynum(musicbrainz_t mb_o, int numalbum)
 }
 
 /*
- * Get a new input string and replace it with the old one, given as param
+ * Get a new input string and replace it with the old one, given as param.
  *
  */
 void
@@ -188,14 +226,7 @@ void tsr_cli_artist_edit(tsr_metainfo_t *metainfo) { char *artist = 0; size_t
 	for(i = 0; i < metainfo->numtracks; i++)
 	{
 		char *tartist;
-		tartist = (char *) malloc(alen * sizeof(char));
-		if(!tartist)
-		{
-			perror(__FILE__":"lineno(__LINE__));
-			exit(1);
-		}
-
-		strncpy(tartist, artist, alen);
+		tsr_copystr(&tartist, artist);
 		free(metainfo->trackinfos[i]->artist);
 		metainfo->trackinfos[i]->artist = tartist;
 	}
@@ -203,7 +234,7 @@ void tsr_cli_artist_edit(tsr_metainfo_t *metainfo) { char *artist = 0; size_t
 }
 
 /*
- * print musicbrainz metainfo, ask for edit and return metainfo, or null
+ * print musicbrainz metainfo, ask for edit and return metainfo, or null.
  * 
  */
 tsr_metainfo_t *
@@ -265,7 +296,7 @@ tsr_cli_metainfo_mb_finish(tsr_metainfo_t *metainfo)
 }
 
 /*
- * Get meta information from musicbrainz database
+ * Get meta information from musicbrainz database.
  *
  */
 tsr_metainfo_t *
@@ -286,7 +317,7 @@ tsr_cli_metainfo_mb(musicbrainz_t mb_o, int numalbums)
 	metainfos = (tsr_metainfo_t **) malloc(numalbums * sizeof(tsr_metainfo_t *));
 	if(!metainfos)
 	{
-		perror(__FILE__":"lineno(__LINE__));
+		perror(__FILE__":"LINENO(__LINE__));
 		exit(1);
 	}
 
@@ -330,14 +361,13 @@ tsr_cli_metainfo_mb(musicbrainz_t mb_o, int numalbums)
 }
 
 /*
- * Get meta info from user by asking for input
+ * Get meta info from user by asking for input.
  *
  */
 tsr_metainfo_t *
 tsr_cli_metainfo_input(int numtracks)
 {
 	int i;
-	int ismultiple;
 	char *artist = 0, *selection = 0;
 	size_t a_read, t_read;
 
@@ -346,20 +376,19 @@ tsr_cli_metainfo_input(int numtracks)
 	metainfo = (tsr_metainfo_t *) malloc(sizeof(tsr_metainfo_t));
 	if(!metainfo)
 	{
-		perror(__FILE__":"lineno(__LINE__));
+		perror(__FILE__":"LINENO(__LINE__));
 		exit(1);
 	}
 
 	metainfo->numtracks = numtracks;
 	metainfo->album = 0;
-
 	
-	printf("Ist this a multi-artist album? (y/N) ");
+	printf("Is this a multi-artist album? (y/N) ");
 	getline(&selection, &a_read, stdin);
-	ismultiple = (*selection == 'y') ? 1 : 0;
+	metainfo->ismultiple = (*selection == 'y') ? 1 : 0;
 	free(selection);
 
-	if(!ismultiple)
+	if(!metainfo->ismultiple)
 	{
 		printf("Album artist: ");
 		getline(&artist, &a_read, stdin);
@@ -374,7 +403,7 @@ tsr_cli_metainfo_input(int numtracks)
 	metainfo->trackinfos = (tsr_trackinfo_t **) malloc(numtracks * sizeof(tsr_trackinfo_t *));
 	if(!metainfo->trackinfos)
 	{
-		perror(__FILE__":"lineno(__LINE__));
+		perror(__FILE__":"LINENO(__LINE__));
 		exit(1);
 	}
 
@@ -385,7 +414,7 @@ tsr_cli_metainfo_input(int numtracks)
 		trackinfo = (tsr_trackinfo_t *) malloc(sizeof(tsr_trackinfo_t));
 		if(!trackinfo)
 		{
-			perror(__FILE__":"lineno(__LINE__));
+			perror(__FILE__":"LINENO(__LINE__));
 			exit(1);
 		}
 
@@ -396,17 +425,8 @@ tsr_cli_metainfo_input(int numtracks)
 		getline(&trackinfo->title, &t_read, stdin);
 		tsr_cli_stripnewline(trackinfo->title);
 
-		if(!ismultiple)
-		{
-			trackinfo->artist = (char *) malloc(a_read * sizeof(char));
-			if(!trackinfo->artist)
-			{
-				perror(__FILE__":"lineno(__LINE__));
-				exit(1);
-			}
-
-			strncpy(trackinfo->artist, artist, a_read);
-		}
+		if(!metainfo->ismultiple)
+			tsr_copystr(&trackinfo->artist, artist);
 		else
 		{
 			printf("Artist for Track %i: ", i + 1);
@@ -499,7 +519,7 @@ tsr_cli_encode_track(int tracknum, char *musicdir, tsr_metainfo_t *metainfo,
 			tsr_trackfile_fail(trackfile);
 			printf("\n");
 			fflush(stdout);
-			fprintf(stderr, "Error reading Track %i\n", rtrack);
+			fprintf(stderr, "\nError reading Track %i\n", rtrack);
 			exit(1);
 		}
 
@@ -523,7 +543,60 @@ tsr_cli_encode_track(int tracknum, char *musicdir, tsr_metainfo_t *metainfo,
 }
 
 /*
- * Main program
+ * Handle command line arguments.
+ * 
+ */
+void
+tsr_cli_handle_args(int argc, char **argv, tsr_cfg_t *cfg)
+{
+	int option, loption;
+
+	struct option lopts[] =
+	{
+		{"multidisc", 0, 0, 'm'},
+		{"device", 1, 0, 'd'},
+		{"paranoiamode", 1, 0, 'p'}, 
+		{"musicdir", 1, 0, 0},
+		{"vorbisquality", 1, 0, 0},
+		{"usage", 0, 0, 'u'},
+		{"help", 0, 0, 'h'},
+		{"version", 0, 0, 'v'},
+		{0, 0, 0, 0}
+	};
+
+	while((option = getopt_long(argc, argv, "md:p:uvh", lopts, &loption)) != -1)
+	{
+		switch(option)
+		{
+			case 0:
+				if(!strcmp(lopts[loption].name, "musicdir"))
+					tsr_copystr(&cfg->musicdir, optarg);
+				else if(!strcmp(lopts[loption].name, "vorbisquality"))
+					tsr_cfg_set_vorbisqualiy(cfg, optarg);
+				break;
+			case 'm':
+				cfg->multidisc = 1;
+				break;
+			case 'd':
+				tsr_copystr(&cfg->device, optarg);
+				break;
+			case 'p':
+				tsr_cfg_set_paranoiamode(cfg, optarg);
+			case 'v':
+				tsr_cli_print_version();
+				exit(0);
+			case 'u':
+				tsr_cli_print_usage();
+				exit(0);
+			case 'h':
+				tsr_cli_print_help();
+				exit(0);
+		}
+	}
+}
+
+/*
+ * Main program.
  *
  */
 int
@@ -540,21 +613,26 @@ main(int argc, char **argv)
 
 	cfg = tsr_cfg_init();
 
-	printf("Initializing device...");
+	tsr_cli_handle_args(argc, argv, cfg);
+
+	printf("Initializing device... ");
 	fflush(stdout);
 
-	if(cfg->device)
-		drive = cdda_identify(cfg->device, CDDA_MESSAGE_FORGETIT, 0);
-	else
-		drive = cdda_find_a_cdrom(CDDA_MESSAGE_FORGETIT, 0);
+	drive = (cfg->device) ?
+		cdda_identify(cfg->device, CDDA_MESSAGE_FORGETIT, 0) : 
+		cdda_find_a_cdrom(CDDA_MESSAGE_FORGETIT, 0);
 		
 	if(!drive || cdda_open(drive))
 	{
-		fprintf(stderr, "Can't open cdrom drive.\n");
+		char *device;
+
+		device = (!drive) ? cfg->device : drive->cdda_device_name;
+			
+		fprintf(stderr, "Can't open cdrom drive %s.\n", device);
 		exit(1);
 	}
 
-	printf(" %s\n", drive->cdda_device_name);
+	printf("%s\n", drive->cdda_device_name);
 
 	mb_o = tsr_mb_init(drive->cdda_device_name);
 	metainfo = tsr_cli_metainfo(mb_o, drive->tracks);
@@ -562,11 +640,16 @@ main(int argc, char **argv)
 	if(!metainfo)
 		exit(0);
 
-	printf("Enter Disc number (if this is a multidisc album): ");
-	getline(&discinput, &read, stdin);
+	if(cfg->multidisc)
+	{
+		printf("Enter disc number (leave blank if there is only one): ");
+		getline(&discinput, &read, stdin);
 
-	metainfo->discnum = atoi(discinput);
-	free(discinput);
+		metainfo->discnum = atoi(discinput);
+		free(discinput);
+	}
+	else
+		metainfo->discnum = 0;
 
 	paranoia = paranoia_init(drive);
 	paranoia_modeset(paranoia, cfg->paranoia_mode);

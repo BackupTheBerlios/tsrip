@@ -17,23 +17,31 @@ Configuration
 =============
 
 Tsrip has the following configuration options, which can be defined in
-~/tsriprc.
+~/tsriprc. All of these can be overriden with the appropriate command line
+optoins, see tsrip --usage.
 
 musicdir=<path>
 
 The path where the encoded tracks will be saved. Default is ~/music.
 
-paranoia_mode=<mode>
+paranoiamode=<mode>
 
 One of the following paranoia modes: off, verify, fragment, overlap,
 scratch, repair, neverskip, full. Default is repair.
 
-vorbis_quality=<value>
+vorbisquality=<value>
 
 The value can be between 1 and 10, the higher this value is, the better the
 quality of the ogg file. A quality level of 4 means approx. 128 kbit/s, which
 is default.
 
+device=<device>
+
+Set the device to use. Make sure it exists.
+
+multidisc=on|off
+
+Set if tsrip should ask for disc number.
 
 =======
 Licence

@@ -20,6 +20,8 @@
  *
  */
 
+#include "tsr_types.h"
+
 tsr_trackfile_t *
 tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo);
 	

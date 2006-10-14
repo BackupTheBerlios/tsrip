@@ -1,3 +1,13 @@
+2006-10-14  Sven Salzwedel <sven_salzwedel@web.de>
+
+	* Added tsr_copystr(), removed other copy solutions
+	* Moved lineno to LINENO in tsr_util.c
+	* Fixed bug where metainfo->ismultiple wasn't set when metainfo was
+	  set by command line and artist became "Various" when encoding
+	* Added multidisc rc file option
+	* Added command line options
+	* Bumped version
+
 2006-10-13  Sven Salzwedel <sven_salzwedel@web.de>
 
 	* Added "device" to config file options
