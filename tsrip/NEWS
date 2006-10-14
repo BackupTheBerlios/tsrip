@@ -1,3 +1,10 @@
+Version 0.0.2
+=============
+
+* Added support for command line options
+* Bugfix with input of artist
+* New config file options: device, multidisc
+
 Version 0.0.1
 =============
 
