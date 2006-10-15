@@ -31,26 +31,38 @@
 #include "tsr_util.h"
 
 /*
+ * Replace chars which aren't usable for pathnames.
+ *
+ */
+void
+tsr_replace_badchars(char *str)
+{
+	char *badchar;
+
+	while((badchar = strchr(str, '/')))
+		*badchar = '|';
+}
+
+/*
  * Create filename and needed directorys.
  *
  */
 char *
 tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 {
-	char *music_path;
-	char *artist_path;
-	char *album_path;
+	char *path = 0;
 	char *artist;
-	char *fname;
+	char *album;
+	char *title;
 	char *home;
 	struct stat s;
 	mode_t mode;
-	int new_mpath = 0; /* FIXME: hack */
+	char *badchar;
 
 	if(metainfo->ismultiple)
 		artist = "Various";
 	else
-		artist = metainfo->trackinfos[tracknum]->artist;
+		tsr_copystr(&artist, metainfo->trackinfos[tracknum]->artist);
 
 	mode = 0755;
 
@@ -59,45 +71,53 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 		char *buf;
 
 		home = getenv("HOME");
-		asprintf(&music_path,"%s%s", home, (musicdir + 1));
-		new_mpath = 1;
+		asprintf(&path,"%s%s", home, (musicdir + 1));
 
 		free(home);
 	}
 	else
-		music_path = musicdir;
+		tsr_copystr(&path, musicdir);
 
-	if(lstat(music_path, &s) == -1 && errno != EEXIST)
+	if(lstat(path, &s) == -1 && errno != EEXIST)
 	{
 		perror("Failed to access music directory");
 		exit(1);
 	}
 	
-	asprintf(&artist_path, "%s/%s", music_path, artist);
+	tsr_replace_badchars(artist);
+	asprintf(&path, "%s/%s", path, artist);
 
-	if(mkdir(artist_path, mode) == -1 && errno != EEXIST)
+	if(mkdir(path, mode) == -1 && errno != EEXIST)
 	{
 		perror("Failed to create artist directory");
 		exit(1);
 	}
 
-	asprintf(&album_path, "%s/%s", artist_path, metainfo->album);
-	if(mkdir(album_path, mode) == -1 && errno != EEXIST)
+	tsr_copystr(&album, metainfo->album); 
+	tsr_replace_badchars(album);
+	asprintf(&path, "%s/%s", path, album);
+
+	if(mkdir(path, mode) == -1 && errno != EEXIST)
 	{
 		perror("Failed to create album directory");
 		exit(1);
 	}
 
-	asprintf(&fname, "%s/%s.ogg", album_path, metainfo->trackinfos[tracknum]->title);
+	tsr_copystr(&title, metainfo->trackinfos[tracknum]->title);
+	tsr_replace_badchars(title);
+	asprintf(&path, "%s/%s.ogg", path, title);
 
-	if(new_mpath)
-		free(music_path);
-	free(artist_path);
-	free(album_path);
+	free(title);
+	free(artist);
+	free(album);
 
-	return fname;
+	return path;
 }
 
+/*
+ * Copy a string from src to dest.
+ *
+ */
 void
 tsr_copystr(char **dest, char *src)
 {

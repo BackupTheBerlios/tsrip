@@ -57,7 +57,7 @@ tsr_cli_print_usage()
 	printf("	-m --multidisc			Ask for disc number\n"
 	       "	-d --device <device>		Use device <device>\n"
 	       "	-p --paranoiamode <mode>	Paranoia mode to use\n"
-	       "	   --musicdir <dir>		Directory wher files should be saved\n"
+	       "	   --musicdir <dir>		Directory where files should be saved\n"
 	       "	   --vorbisquality <1-10>	The vorbis quality to use\n"
 	       "	-u --usage			Print usage information\n"
 	       "	-v --version			Print version\n"

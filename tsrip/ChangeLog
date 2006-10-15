@@ -1,3 +1,8 @@
+2006-10-15  Sven Salzwedel <sven_salzwedel@web.de>
+
+	* Fixed bug where filename was created from title with / char
+	* Typo fix
+
 2006-10-14  Sven Salzwedel <sven_salzwedel@web.de>
 
 	* Added tsr_copystr(), removed other copy solutions
