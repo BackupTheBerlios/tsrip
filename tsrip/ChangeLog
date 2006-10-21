@@ -1,3 +1,14 @@
+2006-10-21  Sven Salzwedel <sven_salzwedel@web.de>
+
+	* Added new options to lowercase ASCII chars in file/dirnames and
+	  replace spaces by underscores
+	* Fixed bug where paranoia mode was always set to "off"
+
+2006-10-19  Sven Salzwedel <sven_salzwedel@web.de>
+
+	* Code refactoring
+	* Fixed bug with new libcdparanoia
+
 2006-10-15  Sven Salzwedel <sven_salzwedel@web.de>
 
 	* Fixed bug where filename was created from title with / char

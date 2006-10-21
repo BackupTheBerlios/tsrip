@@ -22,23 +22,16 @@
 
 #include <musicbrainz/mb_c.h>
 
-musicbrainz_t
-tsr_mb_init(char *device);
+musicbrainz_t tsr_mb_init(char *device);
 
-int
-tsr_mb_numalbums(musicbrainz_t mb_o);
+int tsr_mb_numalbums(musicbrainz_t mb_o);
 
-int
-tsr_mb_album_numtracks(musicbrainz_t mb_o, int numalbum);
+int tsr_mb_album_numtracks(musicbrainz_t mb_o, int numalbum);
 
-char *
-tsr_mb_album_name(musicbrainz_t mb_o, int numalbum);
+int tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum);
 
-int
-tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum);
+char *tsr_mb_album_name(musicbrainz_t mb_o, int numalbum);
 	
-char *
-tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack);
+char *tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack);
 
-char *
-tsr_mb_track_title(musicbrainz_t mb_o, int numalbum, int numtrack);
+char *tsr_mb_track_title(musicbrainz_t mb_o, int numalbum, int numtrack);

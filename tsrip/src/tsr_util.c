@@ -28,29 +28,79 @@
 #include <errno.h>
 
 #include "tsr_types.h"
+#include "tsr_cfg.h"
 #include "tsr_util.h"
 
 /*
  * Replace chars which aren't usable for pathnames.
  *
  */
-void
-tsr_replace_badchars(char *str)
+void tsr_replace_badchars(char *str)
 {
 	char *badchar;
 
-	while((badchar = strchr(str, '/')))
+	while ((badchar = strchr(str, '/')))
+	{
 		*badchar = '|';
+	}
+}
+
+/*
+ * Lowercase the given string.
+ *
+ */
+void tsr_lowercase(char *str)
+{
+	while (*str != '\0')
+	{
+		if (*str >= 'A' && *str <= 'Z')
+		{
+			*str += 32;
+		}
+		str++;
+	}
+}
+
+/*
+ * Replace spaces with underscores in the given string.
+ *
+ */
+void tsr_replace_spaces(char *str)
+{
+	char *space;
+
+	while ((space = strchr(str, ' ')) != NULL)
+	{
+		*space = '_';
+	}
+}
+
+/*
+ * Prepare string for file/dir creation, depending on config.
+ *
+ */
+void tsr_preparefile(tsr_cfg_t *cfg, char *str)
+{
+	tsr_replace_badchars(str);
+
+	if (cfg->stripspaces)
+	{
+		tsr_replace_spaces(str);
+	}
+
+	if (cfg->lowercase)
+	{
+		tsr_lowercase(str);
+	}
 }
 
 /*
  * Create filename and needed directorys.
  *
  */
-char *
-tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
+char *tsr_get_filename(tsr_cfg_t *cfg, tsr_metainfo_t *metainfo, int tracknum)
 {
-	char *path = 0;
+	char *path = NULL;
 	char *artist;
 	char *album;
 	char *title;
@@ -59,54 +109,59 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 	mode_t mode;
 	char *badchar;
 
-	if(metainfo->ismultiple)
+	if (metainfo->ismultiple)
+	{
 		artist = "Various";
+	}
 	else
-		tsr_copystr(&artist, metainfo->trackinfos[tracknum]->artist);
+	{
+		artist = strdup(metainfo->trackinfos[tracknum]->artist);
+	}
 
 	mode = 0755;
 
-	if(*musicdir == '~')
+	if (*cfg->musicdir == '~')
 	{
 		char *buf;
 
 		home = getenv("HOME");
-		asprintf(&path,"%s%s", home, (musicdir + 1));
-
+		asprintf(&path, "%s%s", home, cfg->musicdir + 1);
 		free(home);
 	}
 	else
-		tsr_copystr(&path, musicdir);
+	{
+		path = strdup(cfg->musicdir);
+	}
 
-	if(lstat(path, &s) == -1 && errno != EEXIST)
+	if (lstat(path, &s) == -1 && errno != EEXIST)
 	{
 		perror("Failed to access music directory");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
-	tsr_replace_badchars(artist);
+
+	tsr_preparefile(cfg, artist);
 	asprintf(&path, "%s/%s", path, artist);
 
-	if(mkdir(path, mode) == -1 && errno != EEXIST)
+	if (mkdir(path, mode) == -1 && errno != EEXIST)
 	{
 		perror("Failed to create artist directory");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
-	tsr_copystr(&album, metainfo->album); 
-	tsr_replace_badchars(album);
+	album = strdup(metainfo->album);
+	tsr_preparefile(cfg, album);
 	asprintf(&path, "%s/%s", path, album);
 
-	if(mkdir(path, mode) == -1 && errno != EEXIST)
+	if (mkdir(path, mode) == -1 && errno != EEXIST)
 	{
 		perror("Failed to create album directory");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
-	tsr_copystr(&title, metainfo->trackinfos[tracknum]->title);
-	tsr_replace_badchars(title);
+	title = strdup(metainfo->trackinfos[tracknum]->title);
+	tsr_preparefile(cfg, title);
 	asprintf(&path, "%s/%s.ogg", path, title);
-
 	free(title);
 	free(artist);
 	free(album);
@@ -114,36 +169,60 @@ tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum)
 	return path;
 }
 
+void tsr_exit_error(char *file, int line, int err)
+{
+	printf("File %s:line %i: %s", file, line, strerror(errno));
+	exit(EXIT_FAILURE);
+}
+
 /*
- * Copy a string from src to dest.
+ * Create a new instance of an metainfo structure.
  *
  */
-void
-tsr_copystr(char **dest, char *src)
+tsr_metainfo_t *tsr_metainfo_new(int size)
 {
-	int len;
+	int i;
+	tsr_metainfo_t *metainfo;
 
-	len = strlen(src) + 1;
-	*dest = (char *) malloc(len * sizeof(char));
-	if(!*dest)
+	metainfo = (tsr_metainfo_t *) malloc(sizeof(tsr_metainfo_t));
+
+	if (metainfo == NULL)
 	{
-		perror(__FILE__":"LINENO(__LINE__));
-		exit(1);
+		tsr_exit_error(__FILE__, __LINE__, errno);
 	}
-	strncpy(*dest, src, len);
+
+	metainfo->trackinfos = (tsr_trackinfo_t **) malloc(size * sizeof(tsr_metainfo_t));
+
+	if (metainfo->trackinfos == NULL)
+	{
+		tsr_exit_error(__FILE__, __LINE__, errno);
+	}
+
+	for (i = 0; i < size; i++)
+	{
+		metainfo->trackinfos[i] = (tsr_trackinfo_t *) malloc(sizeof(tsr_trackinfo_t));
+
+		if (metainfo->trackinfos[i] == NULL)
+		{
+			tsr_exit_error(__FILE__, __LINE__, errno);
+		}
+	}
+
+	return metainfo;
 }
 
 /*
  * Free metainfo structure.
  *
  */
-void
-tsr_metainfo_free(tsr_metainfo_t *metainfo)
+void tsr_metainfo_free(tsr_metainfo_t *metainfo)
 {
 	int i;
 
-	for(i = 0; i < metainfo->numtracks; i++)
+	for (i = 0; i < metainfo->numtracks; i++)
+	{
 		free(metainfo->trackinfos[i]);
+	}
 
 	free(metainfo->trackinfos);
 	free(metainfo->album);

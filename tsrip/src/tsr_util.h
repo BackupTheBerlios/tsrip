@@ -20,14 +20,10 @@
  *
  */
 
-#define LINENO(x) _LINENO(x)
-#define _LINENO(x) #x
+char *tsr_get_filename(tsr_cfg_t *cfg, tsr_metainfo_t *metainfo, int tracknum);
 
-char *
-tsr_get_filename(char *musicdir, tsr_metainfo_t *metainfo, int tracknum);
+void tsr_exit_error(char *file, int line, int err);
 
-void
-tsr_copystr(char **dest, char *src);
+tsr_metainfo_t *tsr_metainfo_new(int size);
 
-void
-tsr_metainfo_free(tsr_metainfo_t *metainfo);
+void tsr_metainfo_free(tsr_metainfo_t *metainfo);

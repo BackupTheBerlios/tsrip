@@ -30,8 +30,7 @@
  * Initialize musicbrainz, set utf, set device etc.
  *
  */
-musicbrainz_t
-tsr_mb_init(char *device)
+musicbrainz_t tsr_mb_init(char *device)
 {
 	musicbrainz_t mb_o;
 	
@@ -46,8 +45,7 @@ tsr_mb_init(char *device)
  * Get number of albums found for cd in drive.
  *
  */
-int
-tsr_mb_numalbums(musicbrainz_t mb_o)
+int tsr_mb_numalbums(musicbrainz_t mb_o)
 {
 	int c = 0;
 
@@ -61,8 +59,7 @@ tsr_mb_numalbums(musicbrainz_t mb_o)
  * Get number of tracks for the given album number.
  *
  */
-int
-tsr_mb_album_numtracks(musicbrainz_t mb_o, int numalbum)
+int tsr_mb_album_numtracks(musicbrainz_t mb_o, int numalbum)
 {
 	int tracks;
 
@@ -76,39 +73,31 @@ tsr_mb_album_numtracks(musicbrainz_t mb_o, int numalbum)
  * Get name for the given album number.
  *
  */
-char *
-tsr_mb_album_name(musicbrainz_t mb_o, int numalbum)
+char *tsr_mb_album_name(musicbrainz_t mb_o, int numalbum)
 {
 	char buf[256];
-	char *album;
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
 	mb_GetResultData(mb_o, MBE_AlbumGetAlbumName, buf, 256);
-
 	buf[255] = 0;
-	tsr_copystr(&album, buf);
 
-	return album;
+	return strdup(buf);
 }
 
 /*
  * Get artist for the given album and track number.
  *
  */
-char *
-tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack)
+char *tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack)
 {	
 	char buf[256];
-	char *artist;
 	int len;
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
 	mb_GetResultData1(mb_o, MBE_AlbumGetArtistName, buf, 256, numtrack);
-	
 	buf[255] = 0;
-	tsr_copystr(&artist, buf);
 
-	return artist;
+	return strdup(buf);
 
 }
 
@@ -116,8 +105,7 @@ tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack)
  * Check if the album identifyed by numalbum is a multiartist album.
  *
  */
-int
-tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
+int tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
 {
 	int i;
 	char *artist;
@@ -126,16 +114,22 @@ tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
 	for(i = 1; i <= tsr_mb_album_numtracks(mb_o, numalbum); i++)
 	{
 		artist = tsr_mb_track_artist(mb_o, numalbum, i);
+
 		if(!partist)
-			tsr_copystr(&partist, artist);
+		{
+			partist = strdup(artist);
+		}
 		else
 		{
 			if(!strcmp(partist, artist))
+			{
 				free(artist);
+			}
 			else
 			{
 				free(partist);
 				free(artist);
+
 				return 1;
 			}
 		}
@@ -150,18 +144,14 @@ tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
  * Get track name for the given album and track number.
  *
  */
-char *
-tsr_mb_track_title(musicbrainz_t mb_o, int numalbum, int numtrack)
+char *tsr_mb_track_title(musicbrainz_t mb_o, int numalbum, int numtrack)
 {
 	char buf[256];
-	char *title;
 	int len;
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
 	mb_GetResultData1(mb_o, MBE_AlbumGetTrackName, buf, 256, numtrack);
-
 	buf[255] = 0;
-	tsr_copystr(&title, buf);
 
-	return title;
+	return strdup(buf);
 }

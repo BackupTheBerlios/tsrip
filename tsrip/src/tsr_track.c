@@ -34,25 +34,21 @@
  * Initialize file, ogg stuff etc. 
  *
  */
-tsr_trackfile_t *
-tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo)
+tsr_trackfile_t *tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo)
 {
 	tsr_trackfile_t *trackfile;
 	tsr_trackinfo_t *trackinfo;
-
 	ogg_page opage;
 	ogg_packet oheader;
 	ogg_packet oheader_comm;
 	ogg_packet oheader_code;
-
 	char *stracknum;
 	char *sdiscnum;
 
 	trackinfo = metainfo->trackinfos[tracknum];
-
 	trackfile = (tsr_trackfile_t *) malloc(sizeof(tsr_trackfile_t));
-
 	trackfile->file_s = fopen(filename, "w");
+
 	if(!trackfile->file_s)
 	{
 		perror("tsr_track_init: fopen");
@@ -66,7 +62,7 @@ tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo)
 	vorbis_analysis_init(&trackfile->vdsp_state, &trackfile->vinfo);
 	vorbis_block_init(&trackfile->vdsp_state, &trackfile->vblock);
 	ogg_stream_init(&(trackfile->ostream), tracknum);
-	
+
 	vorbis_comment_add_tag(&trackfile->vcomment, "ENCODER", "tsrip");
 	vorbis_comment_add_tag(&trackfile->vcomment, "TITLE", trackinfo->title);
 	vorbis_comment_add_tag(&trackfile->vcomment, "ARTIST", trackinfo->artist);
@@ -85,7 +81,6 @@ tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo)
 
 	vorbis_analysis_headerout(&trackfile->vdsp_state, &trackfile->vcomment,
 			&oheader, &oheader_comm, &oheader_code);
-
 	ogg_stream_packetin(&trackfile->ostream, &oheader);
 	ogg_stream_packetin(&trackfile->ostream, &oheader_comm);
 	ogg_stream_packetin(&trackfile->ostream, &oheader_code);
@@ -109,8 +104,7 @@ tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo)
  * Write next ogg blocks and finish unfinished ones.
  *
  */
-void
-tsr_trackfile_encode_handle_blocks(tsr_trackfile_t *trackfile)
+void tsr_trackfile_encode_handle_blocks(tsr_trackfile_t *trackfile)
 {
 	ogg_packet opackage;
 	ogg_page opage;
@@ -142,8 +136,7 @@ tsr_trackfile_encode_handle_blocks(tsr_trackfile_t *trackfile)
  * Encode next buffer. 
  *
  */
-void
-tsr_trackfile_encode_next(tsr_trackfile_t *trackfile, char *read_buffer)
+void tsr_trackfile_encode_next(tsr_trackfile_t *trackfile, char *read_buffer)
 {
 	float **encode_buffer;
 	int i;
@@ -159,7 +152,6 @@ tsr_trackfile_encode_next(tsr_trackfile_t *trackfile, char *read_buffer)
 	}
 
 	vorbis_analysis_wrote(&trackfile->vdsp_state, i);
-
 	tsr_trackfile_encode_handle_blocks(trackfile);
 }
 
@@ -167,8 +159,7 @@ tsr_trackfile_encode_next(tsr_trackfile_t *trackfile, char *read_buffer)
  * OMG, something went wrong ...
  *
  */
-void
-tsr_trackfile_fail(tsr_trackfile_t *trackfile)
+void tsr_trackfile_fail(tsr_trackfile_t *trackfile)
 {
 	fclose(trackfile->file_s);
 	unlink(trackfile->filename);
@@ -178,20 +169,16 @@ tsr_trackfile_fail(tsr_trackfile_t *trackfile)
  * Finish file. 
  *
  */
-void
-tsr_trackfile_finish(tsr_trackfile_t *trackfile)
+void tsr_trackfile_finish(tsr_trackfile_t *trackfile)
 {
 	vorbis_analysis_wrote(&trackfile->vdsp_state, 0);
 	tsr_trackfile_encode_handle_blocks(trackfile);
-
 	ogg_stream_clear(&trackfile->ostream);
-
 	vorbis_block_clear(&trackfile->vblock);
 	vorbis_dsp_clear(&trackfile->vdsp_state);
 	vorbis_comment_clear(&trackfile->vcomment);
 	vorbis_info_clear(&trackfile->vinfo);
 
 	fclose(trackfile->file_s);
-
 	free(trackfile);
 }

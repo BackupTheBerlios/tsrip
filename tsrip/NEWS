@@ -1,3 +1,13 @@
+Version 0.0.3
+=============
+
+* Added support for newer libcdparanoia (access to device name was broken
+  before)
+* Added support to lowercase ASCII chars in file and dir name when saving
+* Added support to replace spaces by underscores in file and dir names
+* Fixed bug where '/' char was in meta info and dir/file creation was broken
+* Fixed bug where paranoia mode was always set to off
+
 Version 0.0.2
 =============
 

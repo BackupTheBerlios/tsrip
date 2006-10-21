@@ -22,14 +22,10 @@
 
 #include "tsr_types.h"
 
-tsr_trackfile_t *
-tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo);
+tsr_trackfile_t *tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t *metainfo);
 	
-void
-tsr_trackfile_encode_next(tsr_trackfile_t *track, char *read_buffer);
+void tsr_trackfile_encode_next(tsr_trackfile_t *track, char *read_buffer);
 
-void
-tsr_trackfile_fail(tsr_trackfile_t *trackfile);
+void tsr_trackfile_fail(tsr_trackfile_t *trackfile);
 
-void
-tsr_trackfile_finish(tsr_trackfile_t *track);
+void tsr_trackfile_finish(tsr_trackfile_t *track);

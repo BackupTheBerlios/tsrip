@@ -29,38 +29,99 @@
 #include <cdda_paranoia.h>
 
 #include "tsr_types.h"
-#include "tsr_util.h"
 #include "tsr_cfg.h"
+#include "tsr_util.h"
 
 #define CFG_FILE ".tsriprc"
 #define CFG_MUSICDIR "~/music"
 #define CFG_DEVICE "/dev/cdrom"
 
 /*
+ * Set if we should lowercase the files and dirs.
+ *
+ */
+int tsr_cfg_set_lowercase(tsr_cfg_t *cfg, char *val)
+{
+	if (!strcmp(val, "off"))
+	{
+		cfg->lowercase = 0;
+	}
+	else if (!strcmp(val, "on"))
+	{
+		cfg->lowercase = 1;
+	}
+	else
+	{
+		return 0;
+	}
+	
+	return 1;
+}
+
+/*
+ * Set if we should strip spaces in files and dirs.
+ *
+ */
+int tsr_cfg_set_stripspaces(tsr_cfg_t *cfg, char *val)
+{
+	if (!strcmp(val, "off"))
+	{
+		cfg->stripspaces = 0;
+	}
+	else if (!strcmp(val, "on"))
+	{
+		cfg->stripspaces = 1;
+	}
+	else
+	{
+		return 0;
+	}
+	
+	return 1;
+}
+
+/*
  * Set paranoia mode, only these predefined values are allowed..
  *
  */
-int
-tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val)
+int tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val)
 {
-	if(strcmp(val, "off"))
-		cfg->paranoia_mode = PARANOIA_MODE_DISABLE;
-	else if(strcmp(val, "full"))
-		cfg->paranoia_mode = PARANOIA_MODE_FULL;
-	else if(strcmp(val, "verify"))
-		cfg->paranoia_mode = PARANOIA_MODE_VERIFY;
-	else if(strcmp(val, "fragment"))
-		cfg->paranoia_mode = PARANOIA_MODE_FRAGMENT;
-	else if(strcmp(val, "overlap"))
-		cfg->paranoia_mode = PARANOIA_MODE_OVERLAP;
-	else if(strcmp(val, "scratch"))
-		cfg->paranoia_mode = PARANOIA_MODE_SCRATCH;
-	else if(strcmp(val, "repair"))
-		cfg->paranoia_mode = PARANOIA_MODE_REPAIR;
-	else if(strcmp(val, "neverskip"))
-		cfg->paranoia_mode = PARANOIA_MODE_NEVERSKIP;
+	if (!strcmp(val, "off"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_DISABLE;
+	}
+	else if (!strcmp(val, "full"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_FULL;
+	}
+	else if (!strcmp(val, "verify"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_VERIFY;
+	}
+	else if (!strcmp(val, "fragment"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_FRAGMENT;
+	}
+	else if (!strcmp(val, "overlap"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_OVERLAP;
+	}
+	else if (!strcmp(val, "scratch"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_SCRATCH;
+	}
+	else if (!strcmp(val, "repair"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_REPAIR;
+	}
+	else if (!strcmp(val, "neverskip"))
+	{
+		cfg->paranoiamode = PARANOIA_MODE_NEVERSKIP;
+	}
 	else
+	{
 		return 0;
+	}
 
 	return 1;
 }
@@ -69,17 +130,17 @@ tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val)
  * Set vorbis quality.
  *
  */
-int
-tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val)
+int tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val)
 {
 	int iquality;
 	float fquality;
 
 	iquality = atoi(val);
-	if(iquality > 0 && iquality <= 10)
+
+	if (iquality > 0 && iquality <= 10)
 	{
 		fquality = 0.1f * iquality;
-		cfg->vorbis_quality = fquality;
+		cfg->vorbisquality = fquality;
 		return 1;
 	}
 
@@ -90,15 +151,20 @@ tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val)
  * Set if we should ask for multiple cd album.
  *
  */
-int
-tsr_cfg_set_multidisc(tsr_cfg_t *cfg, char *val)
+int tsr_cfg_set_multidisc(tsr_cfg_t *cfg, char *val)
 {
-	if(!strcmp(val, "on"))
+	if (!strcmp(val, "on"))
+	{
 		cfg->multidisc = 1;
-	else if(!strcmp(val, "off"))
+	}
+	else if (!strcmp(val, "off"))
+	{
 		cfg->multidisc = 0;
+	}
 	else
+	{
 		return 0;
+	}
 
 	return 1;
 }
@@ -108,22 +174,22 @@ tsr_cfg_set_multidisc(tsr_cfg_t *cfg, char *val)
  * Load default configuration.
  *
  */
-void
-tsr_cfg_defaults(tsr_cfg_t *cfg)
+void tsr_cfg_defaults(tsr_cfg_t *cfg)
 {
-	tsr_copystr(&cfg->musicdir, CFG_MUSICDIR);
-	tsr_copystr(&cfg->device, CFG_DEVICE);
-	cfg->paranoia_mode = PARANOIA_MODE_REPAIR;
-	cfg->vorbis_quality = 0.4;
+	cfg->musicdir = strdup(CFG_MUSICDIR);
+	cfg->device = strdup(CFG_DEVICE);
+	cfg->paranoiamode = PARANOIA_MODE_REPAIR;
+	cfg->vorbisquality = 0.4;
 	cfg->multidisc = 0;
+	cfg->stripspaces = 1;
+	cfg->lowercase = 1;
 }
 
 /*
  * Get value out of a line in the cfg file.
  *
  */
-int
-tsr_cfg_getval(char *line, char **val)
+int tsr_cfg_getval(char *line, char **val)
 {
 	char *esign, *nsign;
 
@@ -131,11 +197,13 @@ tsr_cfg_getval(char *line, char **val)
 	esign = strchr(line, '=');
 	nsign = strchr(line, '\n');
 
-	if(!esign || !nsign || nsign - esign < 2)
+	if (esign == NULL || nsign == NULL || nsign - esign < 2)
+	{
 		return 0;
+	}
 
-	*esign = 0;
-	*nsign = 0;
+	*esign = '\0';
+	*nsign = '\0';
 	*val = esign + 1;
 
 	return 1;
@@ -145,30 +213,49 @@ tsr_cfg_getval(char *line, char **val)
  * Parse and set an option from a string.
  *
  */
-int 
-tsr_cfg_setopt(tsr_cfg_t *cfg, char *line)
+int tsr_cfg_setopt(tsr_cfg_t *cfg, char *line)
 {
 	char *val = 0;
 
 	/* skip empty lines and comments */
-	if(*line == '#' || *line == 0 || *line == '\n')
+	if (*line == '#' || *line == 0 || *line == '\n')
 		return 1;
 
-	if(!tsr_cfg_getval(line, &val))
+	if (!tsr_cfg_getval(line, &val))
 		return 0;
 
-	if(!strcmp(line, "musicdir"))
-		tsr_copystr(&cfg->musicdir, val);
-	else if(!strcmp(line, "device"))
-		tsr_copystr(&cfg->device, val);
-	else if(!strcmp(line, "paranoiamode"))
+	if (!strcmp(line, "musicdir"))
+	{
+		cfg->musicdir = strdup(val);
+	}
+	else if (!strcmp(line, "device"))
+	{
+		cfg->device = strdup(val);
+	}
+	else if (!strcmp(line, "paranoiamode"))
+	{
 		return tsr_cfg_set_paranoiamode(cfg, val);
-	else if(!strcmp(line, "vorbisquality"))
+	}
+	else if (!strcmp(line, "vorbisquality"))
+	{
 		return tsr_cfg_set_vorbisqualiy(cfg, val);
-	else if(!strcmp(line, "multidisc"))
+	}
+	else if (!strcmp(line, "multidisc"))
+	{
 		return tsr_cfg_set_multidisc(cfg, val);
+	}
+	else if (!strcmp(line, "stripspaces"))
+	{
+		return tsr_cfg_set_stripspaces(cfg, val);
+	}
+	else if (!strcmp(line, "lowercase"))
+	{
+		return tsr_cfg_set_lowercase(cfg, val);
+	}
 	else
+	{
 		return 0;
+	}
 
 	return 1;
 }
@@ -177,8 +264,7 @@ tsr_cfg_setopt(tsr_cfg_t *cfg, char *line)
  * Load configuratoin from user config file.
  *
  */
-void
-tsr_cfg_load_usercfg(tsr_cfg_t *cfg)
+void tsr_cfg_load_usercfg(tsr_cfg_t *cfg)
 {
 	char *home, *line;
 	int lineno = 0;
@@ -186,7 +272,8 @@ tsr_cfg_load_usercfg(tsr_cfg_t *cfg)
 
 	line = 0;
 	home = getenv("HOME");
-	if(!home)
+
+	if (!home)
 	{
 		fprintf(stderr, "Cant't get home directory.\n");
 		exit(1);
@@ -195,42 +282,52 @@ tsr_cfg_load_usercfg(tsr_cfg_t *cfg)
 	asprintf(&cfg->cfg_file, "%s/%s", home, CFG_FILE);
 	cfg->cfg_fp = fopen(cfg->cfg_file, "r");
 
-	if(errno == ENOENT)
+	if (errno == ENOENT)
+	{
 		return;
+	}
 
-	if(!cfg->cfg_fp)
+	if (!cfg->cfg_fp)
 	{
 		perror("Can't load user config");
 		exit(1);
 	}
 
-	while((getline(&line, &len, cfg->cfg_fp)) != -1)
+	while ((getline(&line, &len, cfg->cfg_fp)) != -1)
 	{
 		lineno++;
-		if(!tsr_cfg_setopt(cfg, line))
+
+		/* TODO: print error information (bad value etc) */
+		if (!tsr_cfg_setopt(cfg, line))
 		{
 			fprintf(stderr, "Invalid config file at line %i.\n", lineno);
 			exit(1);
 		}
 
-		if(line)
+		if (line != NULL)
+		{
 			free(line);
-		line = 0;
+		}
+
+		line = NULL;
 	}
 
 	fclose(cfg->cfg_fp);
 }
 
-tsr_cfg_t *
-tsr_cfg_init()
+/*
+ * Initialize the cfg data and return a tsr_cfg_t struct.
+ *
+ */
+tsr_cfg_t *tsr_cfg_init()
 {
 	tsr_cfg_t *cfg;
 
 	cfg = (tsr_cfg_t *) malloc(sizeof(tsr_cfg_t));
-	if(!cfg)
+
+	if (!cfg)
 	{
-		perror(__FILE__":"LINENO(__LINE__));
-		exit(1);
+		tsr_exit_error(__FILE__, __LINE__, errno);
 	}
 
 	tsr_cfg_defaults(cfg);

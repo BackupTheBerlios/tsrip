@@ -18,7 +18,7 @@ Configuration
 
 Tsrip has the following configuration options, which can be defined in
 ~/tsriprc. All of these can be overriden with the appropriate command line
-optoins, see tsrip --usage.
+options, see tsrip --usage.
 
 musicdir=<path>
 
@@ -42,6 +42,15 @@ Set the device to use. Make sure it exists.
 multidisc=on|off
 
 Set if tsrip should ask for disc number.
+
+stripspaces=on|off
+
+Set if tsrip should replace spaces by underscores, default is on.
+
+lowercasefiles=on|off
+
+Set if tsrip should lowercase files ans path names for ASCII chars, default is
+on.
 
 =======
 Licence

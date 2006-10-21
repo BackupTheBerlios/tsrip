@@ -26,16 +26,15 @@ typedef struct _tsr_cfg_t
 	FILE *cfg_fp;
 	char *musicdir;
 	char *device;
-	int paranoia_mode;
-	float vorbis_quality;
+	int paranoiamode;
+	float vorbisquality;
 	int multidisc;
+	int stripspaces;
+	int lowercase;
 } tsr_cfg_t;
 
-int
-tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val);
+int tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val);
 
-int
-tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val);
+int tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val);
 
-tsr_cfg_t *
-tsr_cfg_init();
+tsr_cfg_t *tsr_cfg_init();
