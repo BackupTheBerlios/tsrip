@@ -1,0 +1,60 @@
+.\" Process this file with
+.\" groff -man -Tascii tsrip.1
+.\"
+.TH tsrip 1 "2006 November 04"
+.SH NAME
+tsrip - a cd ripping and encoding program
+.SH SYNOPSIS
+.B tsrip
+[options]
+.SH DESCRIPTION
+.B tsrip
+is an easy to use cd ripping and encoding application. It features ogg
+encoding and tagging from musicbrainz database. For getting audio data from
+audio cds it uses cdparanoia. Ripping and encoding is done on the fly, so
+there's no overhead in writing wav files and encoding them afterwards. Also,
+tsrip enables you to tag your albums with a "DISC" tag out of the box, so you
+don't need to use ugly album names like "foo (disc x)".
+.SH OPTIONS
+.TP
+.BI \-m,\ \-\-multidisc
+Ask for disc number.
+.TP
+.BI \-d\  device ,\ \-\-device\  device
+Use
+.I device
+as source. By default, tsrip tries to automatically determine a suitable
+drive.
+.TP
+.BI \-p\  mode ,\ \-\-paranoiamode\ mode
+Paranoia mode to use, where mode is: off, verify, fragment, overlap,
+scratch, repair, neverskip or full. Default is repair.
+.TP
+.BI \-s,\ \-\-stripspaces
+Replace spaces by underscores.
+.TP
+.BI \-l,\ \-\-lowercase
+Lowercase ASCII chars in path.
+.TP
+.BI \-\-musicdir\  dir
+Directory where files should be saved. Default is ~/music
+.TP
+.BI \-\-vorbisquality\  1-10
+The vorbis quality to use. 10 ist best quality. Default is 4.
+.TP
+.BI \-u,\ \-\-usage
+Print usage information
+.TP
+.BI \-v,\ \-\-version
+Print version
+.TP
+.BI \-h,\ \-\-help
+Print help
+.SH FILES
+.TP
+.I ~/.tsriprc
+The configuration file for tsrip.
+.SH AUTHOR
+Sven Salzwedel <sven_salzwedel@web.de>
+.SH "SEE ALSO"
+.BR tsriprc (1)

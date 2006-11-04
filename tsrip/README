@@ -1,58 +1,18 @@
-=====
-tsrip
+About
 =====
 
-tsrip is a simple cd ripping and encoding program. It supports and will only
-support free codecs. Also, it will only support utf8, as the author doesn't
-want to fight with the problems coming with featuring any other than that.
+tsrip is an easy to use cd ripping and encoding application. It features ogg
+encoding and tagging from musicbrainz database. For getting audio data from
+audio cds it uses cdparanoia. Ripping and encoding is done on the fly, so
+there's no overhead in writing wav files and encoding them afterwards. Also,
+tsrip enables you to tag your albums with a "DISC" tag out of the box, so you
+don't need to use ugly album names like "foo (disc x)".
 
-============
 Installation
 ============
 
 For installation instructions, see INSTALL.
 
-=============
-Configuration
-=============
-
-Tsrip has the following configuration options, which can be defined in
-~/tsriprc. All of these can be overriden with the appropriate command line
-options, see tsrip --usage.
-
-musicdir=<path>
-
-The path where the encoded tracks will be saved. Default is ~/music.
-
-paranoiamode=<mode>
-
-One of the following paranoia modes: off, verify, fragment, overlap,
-scratch, repair, neverskip, full. Default is repair.
-
-vorbisquality=<value>
-
-The value can be between 1 and 10, the higher this value is, the better the
-quality of the ogg file. A quality level of 4 means approx. 128 kbit/s, which
-is default.
-
-device=<device>
-
-Set the device to use. Make sure it exists.
-
-multidisc=on|off
-
-Set if tsrip should ask for disc number.
-
-stripspaces=on|off
-
-Set if tsrip should replace spaces by underscores, default is on.
-
-lowercasefiles=on|off
-
-Set if tsrip should lowercase files ans path names for ASCII chars, default is
-on.
-
-=======
 Licence
 =======
 

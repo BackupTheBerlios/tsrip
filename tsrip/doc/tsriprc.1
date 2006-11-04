@@ -1,0 +1,45 @@
+
+.\" Process this file with
+.\" groff -man -Tascii tsriprc.1
+.\"
+.TH tsriprc 1 "2006 November 04"
+.SH NAME
+~/tsriprc - Configuration file for the tsrip cd ripper
+.SH SYNOPSIS
+.B tsrip
+[options]
+.SH DESCRIPTION
+The format of this configuration file is very simple. Every line can hold an
+option and value assignment, divided by the equality sign
+.B =
+. Commented lines begin with #, empty lines are ignored. Unknown options and
+other line formats are considered as fatal errors.
+.SH OPTIONS
+.BI multidisc= on|off
+Alwas ask for disc number if turned on. Default is off.
+.TP
+.BI device= device
+Use
+.I device
+as source for audio data. By default, tsrip tries to automatically determine
+a suitable drive.
+.TP
+.BI paranoiamode= mode
+Paranoia mode to use, where mode is: off, verify, fragment, overlap,
+scratch, repair, neverskip or full. Default is repair.
+.TP
+.BI stripspaces= on|off
+Replace spaces by underscores. Default is off.
+.TP
+.BI lowercase= on|off
+Lowercase ASCII chars in path. Default is off.
+.TP
+.BI musicdir= dir
+Directory where files should be saved. Default is ~/music
+.TP
+.BI vorbisquality= 1-10
+The vorbis quality to use. 10 ist best quality. Default is 4.
+.SH AUTHOR
+Sven Salzwedel <sven_salzwedel@web.de>
+.SH "SEE ALSO"
+.BR tsrip (1)

@@ -1,2 +1,4 @@
-- Add flac (if requested)
-- Maybe switch to curses for better ui?
+- Multilanguage support
+- flac
+- More tags
+- Better command line interface (maybe curses?)

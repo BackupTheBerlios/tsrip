@@ -26,4 +26,6 @@ void tsr_exit_error(char *file, int line, int err);
 
 tsr_metainfo_t *tsr_metainfo_new(int size);
 
+tsr_metainfo_t *tsr_metainfo_copy(tsr_metainfo_t *metainfo);
+
 void tsr_metainfo_free(tsr_metainfo_t *metainfo);

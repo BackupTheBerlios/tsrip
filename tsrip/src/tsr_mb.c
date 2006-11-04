@@ -49,8 +49,10 @@ int tsr_mb_numalbums(musicbrainz_t mb_o)
 {
 	int c = 0;
 
-	if(mb_Query(mb_o, MBQ_GetCDInfo))
+	if (mb_Query(mb_o, MBQ_GetCDInfo))
+	{
 		c = mb_GetResultInt(mb_o, MBE_GetNumAlbums);
+	}
 
 	return (c > 0) ? c : 0;
 }
@@ -79,7 +81,7 @@ char *tsr_mb_album_name(musicbrainz_t mb_o, int numalbum)
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
 	mb_GetResultData(mb_o, MBE_AlbumGetAlbumName, buf, 256);
-	buf[255] = 0;
+	buf[255] = '\0';
 
 	return strdup(buf);
 }
@@ -95,7 +97,7 @@ char *tsr_mb_track_artist(musicbrainz_t mb_o, int numalbum, int numtrack)
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
 	mb_GetResultData1(mb_o, MBE_AlbumGetArtistName, buf, 256, numtrack);
-	buf[255] = 0;
+	buf[255] = '\0';
 
 	return strdup(buf);
 
@@ -109,19 +111,19 @@ int tsr_mb_album_ismultiple(musicbrainz_t mb_o, int numalbum)
 {
 	int i;
 	char *artist;
-	char *partist = 0;
+	char *partist = NULL;
 
-	for(i = 1; i <= tsr_mb_album_numtracks(mb_o, numalbum); i++)
+	for (i = 1; i <= tsr_mb_album_numtracks(mb_o, numalbum); i++)
 	{
 		artist = tsr_mb_track_artist(mb_o, numalbum, i);
 
-		if(!partist)
+		if (!partist)
 		{
 			partist = strdup(artist);
 		}
 		else
 		{
-			if(!strcmp(partist, artist))
+			if (!strcmp(partist, artist))
 			{
 				free(artist);
 			}
@@ -151,7 +153,7 @@ char *tsr_mb_track_title(musicbrainz_t mb_o, int numalbum, int numtrack)
 
 	mb_Select1(mb_o, MBS_SelectAlbum, numalbum);
 	mb_GetResultData1(mb_o, MBE_AlbumGetTrackName, buf, 256, numtrack);
-	buf[255] = 0;
+	buf[255] = '\0';
 
 	return strdup(buf);
 }

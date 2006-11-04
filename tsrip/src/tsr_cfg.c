@@ -141,6 +141,7 @@ int tsr_cfg_set_vorbisqualiy(tsr_cfg_t *cfg, char *val)
 	{
 		fquality = 0.1f * iquality;
 		cfg->vorbisquality = fquality;
+
 		return 1;
 	}
 
@@ -181,8 +182,8 @@ void tsr_cfg_defaults(tsr_cfg_t *cfg)
 	cfg->paranoiamode = PARANOIA_MODE_REPAIR;
 	cfg->vorbisquality = 0.4;
 	cfg->multidisc = 0;
-	cfg->stripspaces = 1;
-	cfg->lowercase = 1;
+	cfg->stripspaces = 0;
+	cfg->lowercase = 0;
 }
 
 /*
@@ -218,7 +219,7 @@ int tsr_cfg_setopt(tsr_cfg_t *cfg, char *line)
 	char *val = 0;
 
 	/* skip empty lines and comments */
-	if (*line == '#' || *line == 0 || *line == '\n')
+	if (*line == '#' || *line == '\0' || *line == '\n')
 		return 1;
 
 	if (!tsr_cfg_getval(line, &val))

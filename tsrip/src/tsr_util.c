@@ -212,6 +212,36 @@ tsr_metainfo_t *tsr_metainfo_new(int size)
 }
 
 /*
+ * Create a new metainfo and copy values from an existing one.
+ * 
+ */
+tsr_metainfo_t *tsr_metainfo_copy(tsr_metainfo_t *metainfo)
+{
+	int i;
+	tsr_metainfo_t *metainfoc;
+
+	metainfoc = tsr_metainfo_new(metainfo->numtracks);
+
+	if (metainfoc == NULL)
+	{
+		tsr_exit_error(__FILE__, __LINE__, errno);
+	}
+
+	metainfoc->album = strdup(metainfo->album);
+	metainfoc->numtracks = metainfo->numtracks;
+	metainfoc->discnum = metainfo->discnum;
+	metainfoc->ismultiple = metainfo->ismultiple;
+
+	for (i = 0; i < metainfoc->numtracks; i++)
+	{
+		metainfoc->trackinfos[i]->title = strdup(metainfo->trackinfos[i]->title);
+		metainfoc->trackinfos[i]->artist = strdup(metainfo->trackinfos[i]->artist);
+	}
+
+	return metainfoc;
+}
+
+/*
  * Free metainfo structure.
  *
  */

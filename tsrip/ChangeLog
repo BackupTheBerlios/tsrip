@@ -1,3 +1,9 @@
+2006-11-04  Sven Salzwedel <sven_salzwedel@web.de>
+
+	* Code cleanups
+	* Replaced own string handling by libc handling where possible
+	* Added manpages
+
 2006-10-21  Sven Salzwedel <sven_salzwedel@web.de>
 
 	* Added new options to lowercase ASCII chars in file/dirnames and

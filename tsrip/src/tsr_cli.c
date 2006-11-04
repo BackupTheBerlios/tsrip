@@ -110,7 +110,9 @@ void tsr_cli_print_metainfo(tsr_metainfo_t *metainfo)
 		printf("%i: %s", i + 1, metainfo->trackinfos[i]->title);
 
 		if (metainfo->ismultiple)
+		{
 			printf(", by %s", metainfo->trackinfos[i]->artist);
+		}
 
 		printf("\n");
 	}
@@ -127,7 +129,8 @@ void cb(long a, int b)
 }
 
 /*
- * Function to get a line from stdin and automatically strip the newline at end.
+ * Function to get a line from stdin and automatically strip the newline at
+ * end.
  *
  */
 char *tsr_cli_read_str()
@@ -185,8 +188,8 @@ tsr_metainfo_t *tsr_cli_metainfo_mb_bynum(musicbrainz_t mb_o, int numalbum)
 
 /*
  * This function is dedicated to edit the artist on a normal album with one
- * artist. This function is very special, because the artist is stored for
- * each track in the metainfo, even if the album only has one artist.
+ * artist. This function is special, because the artist is stored for each
+ * track in the metainfo, even if the album only has one artist.
  *
  */
 void tsr_cli_artist_edit(tsr_metainfo_t *metainfo)
@@ -285,12 +288,13 @@ tsr_metainfo_t *tsr_cli_metainfo_mb(musicbrainz_t mb_o, int numalbums)
 	if (numalbums == 1)
 	{
 		metainfo = tsr_cli_metainfo_mb_bynum(mb_o, 1);
+
 		return tsr_cli_metainfo_mb_finish(metainfo);
 	}
 
 	metainfos = (tsr_metainfo_t **) malloc(numalbums * sizeof(tsr_metainfo_t *));
 
-	if (metainfos == 0)
+	if (metainfos == NULL)
 	{
 		tsr_exit_error(__FILE__, __LINE__, errno);
 	}
@@ -308,7 +312,7 @@ tsr_metainfo_t *tsr_cli_metainfo_mb(musicbrainz_t mb_o, int numalbums)
 			tsr_cli_print_metainfo_head(metainfos[i]);
 		}
 
-		printf("Select a number to view info or press Enter to leave: ");
+		printf("Select an album to view info or press Enter to leave: ");
 		input = tsr_cli_read_str();
 
 		if (*input == '\0')
@@ -328,6 +332,8 @@ tsr_metainfo_t *tsr_cli_metainfo_mb(musicbrainz_t mb_o, int numalbums)
 
 		if (album > 0 && album <= numalbums)
 		{
+			tsr_metainfo_t *retval;
+
 			metainfo = tsr_cli_metainfo_mb_finish(metainfos[album - 1]);
 
 			if (metainfo == NULL)
@@ -336,18 +342,17 @@ tsr_metainfo_t *tsr_cli_metainfo_mb(musicbrainz_t mb_o, int numalbums)
 				continue;
 			}
 
+			retval = tsr_metainfo_copy(metainfo);
+
 			for (i = 0; i < numalbums; i++)
 			{
-				if (i != album - 1)
-				{
-					tsr_metainfo_free(metainfos[i]);
-				}
+				tsr_metainfo_free(metainfos[i]);
 			}
 
 			free(metainfos);
 			free(input);
 
-			return metainfo;
+			return retval;
 		}
 
 		free(input);
@@ -438,7 +443,9 @@ tsr_metainfo_t *tsr_cli_metainfo(musicbrainz_t mb_o, int numtracks)
 		input = tsr_cli_read_str();
 
 		if (*input == 'q')
+		{
 			break;
+		}
 
 		if (*input == 'i')
 		{
@@ -482,14 +489,13 @@ void tsr_cli_encode_track(int tracknum, tsr_metainfo_t *metainfo, cdrom_drive
 		{
 			tsr_trackfile_fail(trackfile);
 			printf("\n");
-			fflush(stdout);
-			fprintf(stderr, "\nError reading Track %i\n", rtrack);
+			fflush(stdout); fprintf(stderr, "\nError reading Track %i\n", rtrack);
 			exit(1);
 		}
-
+		
 		tsr_trackfile_encode_next(trackfile, read_buffer);
 		p = (cursor - fsec) * 100 / (lsec - fsec);
-
+		
 		if (p != pp)
 		{
 			printf("\rEncoding Track No. %02i/%02i... %3li%%", rtrack,
@@ -595,8 +601,9 @@ int main(int argc, char **argv)
 	{
 		char *device;
 
-		device = (!drive) ? cfg->device : drive->ioctl_device_name;
+		device = (drive == NULL) ? cfg->device : drive->ioctl_device_name;
 		fprintf(stderr, "Can't open cdrom drive %s.\n", device);
+
 		return EXIT_FAILURE;
 	}
 
@@ -605,7 +612,9 @@ int main(int argc, char **argv)
 	metainfo = tsr_cli_metainfo(mb_o, drive->tracks);
 
 	if (metainfo == NULL)
+	{
 		return EXIT_SUCCESS;
+	}
 
 	if (cfg->multidisc)
 	{
@@ -623,7 +632,9 @@ int main(int argc, char **argv)
 	paranoia_modeset(paranoia, cfg->paranoiamode);
 	
 	for (i = 0; i < metainfo->numtracks; i++)
+	{
 		tsr_cli_encode_track(i, metainfo, drive, paranoia, cfg);
+	}
 
 	tsr_metainfo_free(metainfo);
 	printf("\nEncoded all tracks.\n");

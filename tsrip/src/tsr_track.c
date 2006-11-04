@@ -49,7 +49,7 @@ tsr_trackfile_t *tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t
 	trackfile = (tsr_trackfile_t *) malloc(sizeof(tsr_trackfile_t));
 	trackfile->file_s = fopen(filename, "w");
 
-	if(!trackfile->file_s)
+	if (!trackfile->file_s)
 	{
 		perror("tsr_track_init: fopen");
 		exit(1);
@@ -68,7 +68,7 @@ tsr_trackfile_t *tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t
 	vorbis_comment_add_tag(&trackfile->vcomment, "ARTIST", trackinfo->artist);
 	vorbis_comment_add_tag(&trackfile->vcomment, "ALBUM", metainfo->album);
 
-	if(metainfo->discnum > 0)
+	if (metainfo->discnum > 0)
 	{
 		asprintf(&sdiscnum, "%i", metainfo->discnum);
 		vorbis_comment_add_tag(&trackfile->vcomment, "DISC", sdiscnum);
@@ -86,12 +86,14 @@ tsr_trackfile_t *tsr_trackfile_init(int tracknum, char *filename, tsr_metainfo_t
 	ogg_stream_packetin(&trackfile->ostream, &oheader_code);
 
 	/* finish ogg block */
-	while(1)
+	while (1)
 	{
 		int result = ogg_stream_flush(&trackfile->ostream, &opage);
 		
-		if(!result)
+		if (!result)
+		{
 			break;
+		}
 
 		fwrite(opage.header, 1, opage.header_len, trackfile->file_s);
 		fwrite(opage.body, 1, opage.body_len, trackfile->file_s);
@@ -109,21 +111,23 @@ void tsr_trackfile_encode_handle_blocks(tsr_trackfile_t *trackfile)
 	ogg_packet opackage;
 	ogg_page opage;
 
-	while(vorbis_analysis_blockout(&trackfile->vdsp_state, &trackfile->vblock) == 1)
+	while (vorbis_analysis_blockout(&trackfile->vdsp_state, &trackfile->vblock) == 1)
 	{
 		vorbis_analysis(&trackfile->vblock, 0);
 		vorbis_bitrate_addblock(&trackfile->vblock);
 
-		while(vorbis_bitrate_flushpacket(&trackfile->vdsp_state, &opackage))
+		while (vorbis_bitrate_flushpacket(&trackfile->vdsp_state, &opackage))
 		{
 			ogg_stream_packetin(&trackfile->ostream, &opackage);
 
-			while(1)
+			while (1)
 			{
 				int result = ogg_stream_pageout(&trackfile->ostream, &opage);
 				
-				if(!result)
+				if (!result)
+				{
 					break;
+				}
 
 				fwrite(opage.header, 1, opage.header_len, trackfile->file_s);
 				fwrite(opage.body, 1, opage.body_len, trackfile->file_s);
@@ -143,7 +147,7 @@ void tsr_trackfile_encode_next(tsr_trackfile_t *trackfile, char *read_buffer)
 
 	encode_buffer = vorbis_analysis_buffer(&trackfile->vdsp_state, CD_FRAMESAMPLES);
 	
-	for(i = 0; i < CD_FRAMESAMPLES; i++)
+	for (i = 0; i < CD_FRAMESAMPLES; i++)
 	{
 		encode_buffer[0][i] = ((read_buffer[i * 4 + 1] << 8)
 				| (0x00ff & (int)read_buffer[i * 4])) / 32768.f;
