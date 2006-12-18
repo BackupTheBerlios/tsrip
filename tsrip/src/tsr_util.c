@@ -258,3 +258,13 @@ void tsr_metainfo_free(tsr_metainfo_t *metainfo)
 	free(metainfo->album);
 	free(metainfo);
 }
+
+/* 
+ * OMG, something went wrong ...
+ *
+ */
+void tsr_trackfile_fail(tsr_trackfile_t *trackfile)
+{
+	fclose(trackfile->file_s);
+	unlink(trackfile->filename);
+}

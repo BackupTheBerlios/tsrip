@@ -20,6 +20,13 @@
  *
  */
 
+#define CFG_FILE ".tsriprc"
+#define CFG_MUSICDIR "~/music"
+#define CFG_DEVICE "/dev/cdrom"
+
+#define CFG_TYPE_VORBIS (char)1
+#define CFG_TYPE_FLAC   (char)1<<1
+
 typedef struct _tsr_cfg_t
 {
 	char *cfg_file;
@@ -31,6 +38,7 @@ typedef struct _tsr_cfg_t
 	int multidisc;
 	int stripspaces;
 	int lowercase;
+	char enctype;
 } tsr_cfg_t;
 
 int tsr_cfg_set_paranoiamode(tsr_cfg_t *cfg, char *val);

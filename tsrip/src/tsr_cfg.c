@@ -32,10 +32,6 @@
 #include "tsr_cfg.h"
 #include "tsr_util.h"
 
-#define CFG_FILE ".tsriprc"
-#define CFG_MUSICDIR "~/music"
-#define CFG_DEVICE "/dev/cdrom"
-
 /*
  * Set if we should lowercase the files and dirs.
  *
@@ -184,6 +180,7 @@ void tsr_cfg_defaults(tsr_cfg_t *cfg)
 	cfg->multidisc = 0;
 	cfg->stripspaces = 0;
 	cfg->lowercase = 0;
+	cfg->enctype = CFG_TYPE_VORBIS;
 }
 
 /*

@@ -38,15 +38,15 @@ typedef struct _tsr_metainfo_t
 	tsr_trackinfo_t **trackinfos;
 } tsr_metainfo_t;
 
-typedef struct _tsr_trackfile_t
+typedef struct _tsr_trackfile_t tsr_trackfile_t;
+
+typedef void (*tsr_trackfile_encode_t)(tsr_trackfile_t *trackfile, int8_t *buffer);
+typedef void (*tsr_trackfile_finish_t)(tsr_trackfile_t *trackfile);
+
+struct _tsr_trackfile_t
 {
 	FILE *file_s;
 	char *filename;
-
-	vorbis_info vinfo;
-	vorbis_comment vcomment;
-	vorbis_dsp_state vdsp_state;
-	vorbis_block vblock;
-
-	ogg_stream_state ostream;
-} tsr_trackfile_t;
+	tsr_trackfile_encode_t encode;
+	tsr_trackfile_finish_t finish;
+};

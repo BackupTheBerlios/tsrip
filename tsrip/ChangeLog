@@ -1,3 +1,9 @@
+2006-12-18  Sven Salzwedel <sven_salzwedel@web.de>
+
+	* Using function pointers in a basic track structure now for codec
+	  independent encoding, flac integration will follow soon
+	* Fixed bug where vorbisquality was always at 0.4
+
 2006-11-04  Sven Salzwedel <sven_salzwedel@web.de>
 
 	* Code cleanups

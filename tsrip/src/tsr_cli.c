@@ -32,7 +32,7 @@
 
 #include "config.h"
 #include "tsr_cfg.h"
-#include "tsr_track.h"
+#include "tsr_vorbis_track.h"
 #include "tsr_mb.h"
 #include "tsr_util.h"
 
@@ -477,13 +477,21 @@ void tsr_cli_encode_track(int tracknum, tsr_metainfo_t *metainfo, cdrom_drive
 	fsec = cdda_track_firstsector(drive, rtrack);
 	lsec = cdda_track_lastsector(drive, rtrack);
 	paranoia_seek(paranoia, fsec, SEEK_SET);
-	trackfile = tsr_trackfile_init(tracknum, filename, metainfo);
+	tsr_trackfile_encode_t *fp;
+
+	switch(cfg->enctype)
+	{
+		case CFG_TYPE_VORBIS:
+			trackfile = tsr_vorbisfile_init(tracknum, filename, metainfo, cfg->vorbisquality);
+			break;
+	}
+
 	cursor = fsec;
 	pp = 0;
 
 	while (cursor <= lsec)
 	{
-		read_buffer = (char *) paranoia_read(paranoia, cb);
+		read_buffer = (int8_t *) paranoia_read(paranoia, cb);
 
 		if (!read_buffer)
 		{
@@ -493,7 +501,7 @@ void tsr_cli_encode_track(int tracknum, tsr_metainfo_t *metainfo, cdrom_drive
 			exit(1);
 		}
 		
-		tsr_trackfile_encode_next(trackfile, read_buffer);
+		trackfile->encode(trackfile, read_buffer);
 		p = (cursor - fsec) * 100 / (lsec - fsec);
 		
 		if (p != pp)
@@ -507,7 +515,7 @@ void tsr_cli_encode_track(int tracknum, tsr_metainfo_t *metainfo, cdrom_drive
 		cursor++;
 	}
 
-	tsr_trackfile_finish(trackfile);
+	trackfile->finish(trackfile);
 }
 
 /*
